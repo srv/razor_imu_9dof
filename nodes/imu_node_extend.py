@@ -36,8 +36,7 @@ import struct
 import io
 
 #from time import time
-from sensor_msgs.msg import Imu
-from geometry_msgs.msg import PointStamped
+from sensor_msgs.msg import Imu, MagneticField
 from tf.transformations import quaternion_from_euler
 from dynamic_reconfigure.server import Server
 from razor_imu_9dof.cfg import imuConfig
@@ -59,16 +58,16 @@ rospy.init_node("razor_node")
 #We only care about the most recent measurement, i.e. queue_size=1
 imuMsgRaw_pub = rospy.Publisher('imu_raw', Imu, queue_size=1)
 imuMsgCal_pub = rospy.Publisher('imu_cal', Imu, queue_size=1)
-magMsgRaw_pub = rospy.Publisher('mag_raw', PointStamped, queue_size=1)
-magMsgCal_pub = rospy.Publisher('mag_cal', PointStamped, queue_size=1)
+magMsgRaw_pub = rospy.Publisher('mag_raw', MagneticField, queue_size=1)
+magMsgCal_pub = rospy.Publisher('mag_cal', MagneticField, queue_size=1)
 srv = Server(imuConfig, reconfig_callback)  # define dynamic_reconfigure callback
 diag_pub = rospy.Publisher('diagnostics', DiagnosticArray, queue_size=1)
 diag_pub_time = rospy.get_time();
 
 imuMsgRaw = Imu()
 imuMsgCal = Imu()
-magMsgRaw = PointStamped()
-magMsgCal = PointStamped()
+magMsgRaw = MagneticField()
+magMsgCal = MagneticField()
 seq = 1
 
 # Orientation covariance estimation:
@@ -113,9 +112,7 @@ imuMsgCal.linear_acceleration_covariance = acc_cov
 
 default_port='/dev/ttyUSB0'
 port = rospy.get_param('~port', default_port)
-
-#read calibration parameters
-port = rospy.get_param('~port', default_port)
+frame_id = rospy.get_param('~frame_id', '/imu')
 
 #accelerometer
 accel_x_min = rospy.get_param('~accel_x_min', -250.0)
@@ -256,17 +253,17 @@ while not rospy.is_shutdown():
 
                 # Publish message
                 stamp = rospy.Time.now()
-                frame_id = 'base_imu_link'
+                frame_id = frame_id
+                # Publish measures in NED
                 imuMsgRaw.linear_acceleration.x = -float(acc_v[0]) * accel_factor
                 imuMsgRaw.linear_acceleration.y = float(acc_v[1]) * accel_factor
                 imuMsgRaw.linear_acceleration.z = float(acc_v[2]) * accel_factor
-                imuMsgRaw.angular_velocity.x = float(gyr_v[0]) #in AHRS firmware y axis points right, in ROS y axis points left (see REP 103)
-                imuMsgRaw.angular_velocity.y = -float(gyr_v[1])#in AHRS firmware z axis points down, in ROS z axis points up (see REP 103) 
-                imuMsgRaw.angular_velocity.z = -float(gyr_v[2])
-                magMsgRaw.point.x = -float(mag_v[0])
-                magMsgRaw.point.y = float(mag_v[1]) 
-                magMsgRaw.point.z = float(mag_v[2]) 
-
+                imuMsgRaw.angular_velocity.x = float(gyr_v[0]) 
+                imuMsgRaw.angular_velocity.y = float(gyr_v[1])
+                imuMsgRaw.angular_velocity.z = float(gyr_v[2])
+                magMsgRaw.magnetic_field.x = float(mag_v[0])
+                magMsgRaw.magnetic_field.y = float(mag_v[1]) 
+                magMsgRaw.magnetic_field.z = float(mag_v[2]) 
                 imuMsgRaw.header.stamp = stamp
                 imuMsgRaw.header.frame_id = frame_id
                 imuMsgRaw.header.seq = seq
@@ -292,16 +289,16 @@ while not rospy.is_shutdown():
 
                 # Publish message
                 stamp = rospy.Time.now()
-                frame_id = 'base_imu_link'
+                frame_id = frame_id
                 imuMsgCal.linear_acceleration.x = -float(acc_v[0]) * accel_factor
                 imuMsgCal.linear_acceleration.y = float(acc_v[1]) * accel_factor
                 imuMsgCal.linear_acceleration.z = float(acc_v[2]) * accel_factor
                 imuMsgCal.angular_velocity.x = float(gyr_v[0]) #in AHRS firmware y axis points right, in ROS y axis points left (see REP 103)
                 imuMsgCal.angular_velocity.y = -float(gyr_v[1])#in AHRS firmware z axis points down, in ROS z axis points up (see REP 103) 
                 imuMsgCal.angular_velocity.z = -float(gyr_v[2])
-                magMsgCal.point.x = -float(mag_v[0])
-                magMsgCal.point.y = float(mag_v[1]) 
-                magMsgCal.point.z = float(mag_v[2]) 
+                magMsgCal.magnetic_field.x = -float(mag_v[0])
+                magMsgCal.magnetic_field.y = float(mag_v[1]) 
+                magMsgCal.magnetic_field.z = float(mag_v[2]) 
 
                 imuMsgCal.header.stamp = stamp
                 imuMsgCal.header.frame_id = frame_id
