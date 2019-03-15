@@ -210,6 +210,8 @@ ser.write('#cgx' + str(gyro_average_offset_x) + chr(13))
 ser.write('#cgy' + str(gyro_average_offset_y) + chr(13))
 ser.write('#cgz' + str(gyro_average_offset_z) + chr(13))
 
+rospy.loginfo("Calibration values transfered to razor IMU board")
+
 #print calibration values for verification by user
 ser.flushInput()
 ser.write('#p' + chr(13))
@@ -220,12 +222,13 @@ for line in calib_data:
 rospy.loginfo(calib_data_print)
 
 #set output mode
+rospy.loginfo("Set configuration of the razor IMU board")
 ser.write('#osbt' + chr(13)) # To start display angle and sensor reading in text
 ser.write('#s12' + chr(13)) # Token sync
 
 #start datastream
+rospy.loginfo("Start data stream")
 ser.write('#o1' + chr(13))
-rospy.sleep(2)
 
 #automatic flush - NOT WORKING
 ser.flushInput()  #discard old input, still in invalid format
