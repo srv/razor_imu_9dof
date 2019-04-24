@@ -226,16 +226,16 @@ while not rospy.is_shutdown():
     if len(words) > 2:
         #in AHRS firmware z axis points down, in ROS z axis points up (see REP 103)
         yaw_deg = -float(words[0])
-        yaw_deg = yaw_deg + imu_yaw_calibration
-        if yaw_deg > 180.0:
-            yaw_deg = yaw_deg - 360.0
-        if yaw_deg < -180.0:
-            yaw_deg = yaw_deg + 360.0
+        
+        # yaw_deg = yaw_deg + imu_yaw_calibration
+        # if yaw_deg > 180.0:
+        #     yaw_deg = yaw_deg - 360.0
+        # if yaw_deg < -180.0:
+        #     yaw_deg = yaw_deg + 360.0
         yaw = yaw_deg*degrees2rad
         #in AHRS firmware y axis points right, in ROS y axis points left (see REP 103)
         pitch = -float(words[1])*degrees2rad
         roll = float(words[2])*degrees2rad
-
         # Publish message
         # AHRS firmware accelerations are negated
         # This means y and z are correct for ROS, but x needs reversing
