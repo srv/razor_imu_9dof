@@ -129,7 +129,7 @@ magn_y_min = rospy.get_param('~magn_y_min', -600.0)
 magn_y_max = rospy.get_param('~magn_y_max', 600.0)
 magn_z_min = rospy.get_param('~magn_z_min', -600.0)
 magn_z_max = rospy.get_param('~magn_z_max', 600.0)
-calibration_magn_use_extended = rospy.get_param('~calibration_magn_use_extended', False)
+calibration_magn_use_extended = rospy.get_param('~calibration_magn_use_extended', True)
 magn_ellipsoid_center = rospy.get_param('~magn_ellipsoid_center', [0, 0, 0])
 magn_ellipsoid_transform = rospy.get_param('~magn_ellipsoid_transform', [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 imu_yaw_calibration = rospy.get_param('~imu_yaw_calibration', 0.0)
@@ -210,6 +210,8 @@ ser.write('#cgx' + str(gyro_average_offset_x) + chr(13))
 ser.write('#cgy' + str(gyro_average_offset_y) + chr(13))
 ser.write('#cgz' + str(gyro_average_offset_z) + chr(13))
 
+rospy.loginfo("Calibration values transfered to razor IMU board")
+
 #print calibration values for verification by user
 ser.flushInput()
 ser.write('#p' + chr(13))
@@ -220,12 +222,13 @@ for line in calib_data:
 rospy.loginfo(calib_data_print)
 
 #set output mode
+rospy.loginfo("Set configuration of the razor IMU board")
 ser.write('#osbt' + chr(13)) # To start display angle and sensor reading in text
 ser.write('#s12' + chr(13)) # Token sync
 
 #start datastream
+rospy.loginfo("Start data stream")
 ser.write('#o1' + chr(13))
-rospy.sleep(2)
 
 #automatic flush - NOT WORKING
 ser.flushInput()  #discard old input, still in invalid format
@@ -250,20 +253,23 @@ while not rospy.is_shutdown():
                 acc_v = string.split(acc.replace("#A-R=",""),",")
                 mag_v = string.split(mag.replace("#M-R=",""),",")
                 gyr_v = string.split(gyr.replace("#G-R=",""),",")
+                
 
                 # Publish message
                 stamp = rospy.Time.now()
-                frame_id = frame_id
                 # Publish measures in NED
                 imuMsgRaw.linear_acceleration.x = float(acc_v[0]) * accel_factor
                 imuMsgRaw.linear_acceleration.y = float(acc_v[1]) * accel_factor
                 imuMsgRaw.linear_acceleration.z = float(acc_v[2]) * accel_factor
+
                 imuMsgRaw.angular_velocity.x = float(gyr_v[0]) 
-                imuMsgRaw.angular_velocity.y = float(gyr_v[1])
-                imuMsgRaw.angular_velocity.z = float(gyr_v[2])
-                magMsgRaw.magnetic_field.x = float(mag_v[0])
-                magMsgRaw.magnetic_field.y = float(mag_v[1]) 
-                magMsgRaw.magnetic_field.z = float(mag_v[2]) 
+                imuMsgRaw.angular_velocity.y = -float(gyr_v[1])
+                imuMsgRaw.angular_velocity.z = -float(gyr_v[2])
+
+                magMsgRaw.magnetic_field.x = float(mag_v[1]) 
+                magMsgRaw.magnetic_field.y = float(mag_v[0]) 
+                magMsgRaw.magnetic_field.z = float(mag_v[2])
+               
                 imuMsgRaw.header.stamp = stamp
                 imuMsgRaw.header.frame_id = frame_id
                 imuMsgRaw.header.seq = seq
@@ -289,16 +295,18 @@ while not rospy.is_shutdown():
 
                 # Publish message
                 stamp = rospy.Time.now()
-                frame_id = frame_id
-                imuMsgCal.linear_acceleration.x = float(acc_v[0]) * accel_factor
-                imuMsgCal.linear_acceleration.y = float(acc_v[1]) * accel_factor
-                imuMsgCal.linear_acceleration.z = float(acc_v[2]) * accel_factor
-                imuMsgCal.angular_velocity.x = float(gyr_v[0]) #in AHRS firmware y axis points right, in ROS y axis points left (see REP 103)
-                imuMsgCal.angular_velocity.y = float(gyr_v[1])#in AHRS firmware z axis points down, in ROS z axis points up (see REP 103) 
+                # Publish measures in NED
+                imuMsgCal.linear_acceleration.x = -float(acc_v[0]) * accel_factor
+                imuMsgCal.linear_acceleration.y = -float(acc_v[1]) * accel_factor
+                imuMsgCal.linear_acceleration.z = -float(acc_v[2]) * accel_factor
+
+                imuMsgCal.angular_velocity.x = float(gyr_v[0]) 
+                imuMsgCal.angular_velocity.y = float(gyr_v[1])
                 imuMsgCal.angular_velocity.z = float(gyr_v[2])
-                magMsgCal.magnetic_field.x = float(mag_v[0])
-                magMsgCal.magnetic_field.y = float(mag_v[1]) 
-                magMsgCal.magnetic_field.z = float(mag_v[2]) 
+
+                magMsgCal.magnetic_field.x = float(mag_v[1]) 
+                magMsgCal.magnetic_field.y = float(mag_v[0]) 
+                magMsgCal.magnetic_field.z = float(mag_v[2])
 
                 imuMsgCal.header.stamp = stamp
                 imuMsgCal.header.frame_id = frame_id
