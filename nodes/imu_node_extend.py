@@ -258,18 +258,6 @@ while not rospy.is_shutdown():
 
                 # Publish message
                 stamp = rospy.Time.now()
-                # Publish measures in NED
-                # imuMsgRaw.linear_acceleration.x = -float(acc_v[0]) * accel_factor
-                # imuMsgRaw.linear_acceleration.y = -float(acc_v[1]) * accel_factor
-                # imuMsgRaw.linear_acceleration.z = -float(acc_v[2]) * accel_factor
-
-                # imuMsgRaw.angular_velocity.x = float(gyr_v[0]) 
-                # imuMsgRaw.angular_velocity.y = float(gyr_v[1])
-                # imuMsgRaw.angular_velocity.z = float(gyr_v[2])
-
-                # magMsgRaw.magnetic_field.x = float(mag_v[1]) 
-                # magMsgRaw.magnetic_field.y = float(mag_v[0]) 
-                # magMsgRaw.magnetic_field.z = float(mag_v[2])
 
                 # Publish measures in ENU
                 imuMsgRaw.linear_acceleration.x = -float(acc_v[0]) * accel_factor
@@ -309,18 +297,6 @@ while not rospy.is_shutdown():
 
                 # Publish message
                 stamp = rospy.Time.now()
-                # Publish measures in NED
-                # imuMsgCal.linear_acceleration.x = -float(acc_v[0]) * accel_factor
-                # imuMsgCal.linear_acceleration.y = -float(acc_v[1]) * accel_factor
-                # imuMsgCal.linear_acceleration.z = -float(acc_v[2]) * accel_factor
-
-                # imuMsgCal.angular_velocity.x = float(gyr_v[0]) 
-                # imuMsgCal.angular_velocity.y = float(gyr_v[1])
-                # imuMsgCal.angular_velocity.z = float(gyr_v[2])
-
-                # magMsgCal.magnetic_field.x = float(mag_v[1]) 
-                # magMsgCal.magnetic_field.y = float(mag_v[0]) 
-                # magMsgCal.magnetic_field.z = float(mag_v[2])
 
                 # Publish measures in ENU
                 imuMsgCal.linear_acceleration.x = -float(acc_v[0]) * accel_factor
