@@ -49,7 +49,8 @@ def reconfig_callback(config, level):
     rospy.loginfo("""Reconfigure request for yaw_calibration: %d""" %(config['yaw_calibration']))
     #if imu_yaw_calibration != config('yaw_calibration'):
     imu_yaw_calibration = config['yaw_calibration']
-    rospy.loginfo("Set imu_yaw_calibration to %d" % (imu_yaw_calibration))
+    imu_yaw_calibration = rospy.get_param('~imu_yaw_calibration', 0.0)
+    rospy.loginfo("Set imu_yaw_calibration to %f" % (imu_yaw_calibration))
     return config
 
 rospy.init_node("razor_node")
@@ -227,11 +228,11 @@ while not rospy.is_shutdown():
         #in AHRS firmware z axis points down, in ROS z axis points up (see REP 103)
         yaw_deg = -float(words[0])
         
-        # yaw_deg = yaw_deg + imu_yaw_calibration
-        # if yaw_deg > 180.0:
-        #     yaw_deg = yaw_deg - 360.0
-        # if yaw_deg < -180.0:
-        #     yaw_deg = yaw_deg + 360.0
+        yaw_deg = yaw_deg + imu_yaw_calibration
+        if yaw_deg > 180.0:
+            yaw_deg = yaw_deg - 360.0
+        if yaw_deg < -180.0:
+            yaw_deg = yaw_deg + 360.0
         yaw = yaw_deg*degrees2rad
         #in AHRS firmware y axis points right, in ROS y axis points left (see REP 103)
         pitch = -float(words[1])*degrees2rad
@@ -255,8 +256,7 @@ while not rospy.is_shutdown():
     imuMsg.orientation.z = q[2]
     imuMsg.orientation.w = q[3]
     imuMsg.header.stamp= rospy.Time.now()
-    # imuMsg.header.frame_id = 'base_imu_link'
-    imuMsg.header.frame_id = 'xiroi/imu'
+    imuMsg.header.frame_id = ('xiroi/imu')
     imuMsg.header.seq = seq
     seq = seq + 1
     pub.publish(imuMsg)
