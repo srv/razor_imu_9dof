@@ -1,15 +1,22 @@
 ## USB port
-port: /dev/ttyACM0
+port: /dev/serial/by-id/usb-SparkFun_SFE_9DOF-D21_A4C791D251504B5259202020FF0B1B41-if00
 
 
 ##### Calibration ####
 ### accelerometer
-accel_x_min: -250.0
-accel_x_max: 250.0
-accel_y_min: -250.0
-accel_y_max: 250.0
-accel_z_min: -250.0
-accel_z_max: 250.0
+# accel_x_min: -266.24
+# accel_x_max: 265.50
+# accel_y_min: -248.90
+# accel_y_max: 266.97
+# accel_z_min: -265.38
+# accel_z_max: 335.33
+
+accel_x_min: -250
+accel_x_max: 250
+accel_y_min: -250
+accel_y_max: 250
+accel_z_min: -250
+accel_z_max: 250
 
 ### magnetometer
 # standard calibration
@@ -21,14 +28,24 @@ magn_z_min: -600.0
 magn_z_max: 600.0
 
 # extended calibration
-calibration_magn_use_extended: false
-magn_ellipsoid_center: [0, 0, 0]
-magn_ellipsoid_transform: [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+calibration_magn_use_extended: true
+magn_ellipsoid_center: [241.780, 446.601, -167.919]
+magn_ellipsoid_transform: [[0.905394, 0.0335425, 0.00274511], [-0.0335425, 0.988107,-0.00126537], [0.00274511, -0.00126537, 0.902166]]
 
 # AHRS to robot calibration
-imu_yaw_calibration: -1.5708
+imu_yaw_calibration: -15
 
 ### gyroscope
-gyro_average_offset_x: 0.0
-gyro_average_offset_y: 0.0
-gyro_average_offset_z: 0.0
+gyro_average_offset_x: -0.01
+gyro_average_offset_y: -0.01
+gyro_average_offset_z: 0.01
+
+# gyro_average_offset_x: 0
+# gyro_average_offset_y: 0
+# gyro_average_offset_z: 0
+
+# accel x,y,z (min/max) = -266.24/265.50 -248.90/266.97 -265.38/335.33
+# magn x,y,z (min/max) = -138.03/597.15 54.01/823.71 -540.14/214.55
+# gyro x,y,z (current/average) = -0.00/-0.01 -0.01/-0.01 0.01/0.01
+# float magn_ellipsoid_center[3] = {241.780, 446.601, -167.919};
+# float magn_ellipsoid_transform[3][3] = {{0.905394, 0.0335425, 0.00274511}, {-0.0335425, 0.988107,-0.00126537}, {0.00274511, -0.00126537, 0.902166}};
